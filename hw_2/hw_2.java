@@ -34,15 +34,99 @@ public class hw_2{
 		return valid;
 	}
 	
-	public static double[] jacobi(double[][] equations, double[] stopping, int numOfEquations){
+	public static double[] jacobi(double[][] equations, double stopping, double[] initialValue,int numOfEquations){
 		double[] results = new double[numOfEquations];
+		double[] newValue = new double[numOfEquations];
+		int iteration = 0;
+		double sum;
 		
+		do {
+			System.out.println("Iteration #" + iteration);
+			System.out.print("[ ");
+			for(int i = 0; i < numOfEquations; i++) {
+				sum = 0;
+				for(int j = 0; j < numOfEquations; j++) {
+					if(i != j) {
+						sum += equations[i][j] * initialValue[j];
+					}
+					newValue[i] = (equations[i][numOfEquations] - sum) / equations[i][i]; // (result - sum) / xn coefficient
+				}
+				System.out.print(newValue[i] + " ");
+			}
+			System.out.println("]T");
+			
+			//compare to stopping error
+			double numerator = 0;
+			double denominator = 0;
+			for(int i = 0; i < numOfEquations; i++) {
+				numerator += Math.pow((newValue[i] - initialValue[i]), 2);
+				denominator += Math.pow(newValue[i], 2);
+			}
+			
+			if((Math.sqrt(numerator)/Math.sqrt(denominator)) <= stopping) {
+				iteration = 50;
+			}else {
+				for(int i = 0; i < numOfEquations; i++) {//resets for next iteration
+					initialValue[i] = newValue[i];
+				}
+			}
+			
+			iteration++;
+		}while(iteration < 50);
+		
+		for(int i = 0; i < numOfEquations; i++) {
+			results[i] = newValue[i];
+		}
 		return results;
 	}
 	
-	public static double[] gaussian(double[][] equations, double[] stopping, int numOfEquations){
+	public static double[] gaussian(double[][] equations, double stopping, double[] initialValue,int numOfEquations){
 		double[] results = new double[numOfEquations];
+		double[] newValue = new double[numOfEquations];
+		int iteration = 0;
+		double sum;
 		
+		for(int i = 0; i < numOfEquations; i++) {//copy initial value onto new value to use upon gaussian iteration
+			newValue[i] = initialValue[i];
+		}
+		
+		do {
+			System.out.println("Iteration #" + iteration);
+			System.out.print("[ ");
+			for(int i = 0; i < numOfEquations; i++) {
+				sum = 0;
+				for(int j = 0; j < numOfEquations; j++) {
+					if(i != j) {
+						sum += equations[i][j] * newValue[j];
+					}
+					newValue[i] = (equations[i][numOfEquations] - sum) / equations[i][i]; // (result - sum) / xn coefficient
+				}
+				System.out.print(newValue[i] + " ");
+			}
+			System.out.println("]T");
+			
+			//compare to stopping error
+			double numerator = 0;
+			double denominator = 0;
+			for(int i = 0; i < numOfEquations; i++) {
+				numerator += Math.pow((newValue[i] - initialValue[i]), 2);
+				denominator += Math.pow(newValue[i], 2);
+			}
+			
+			if((Math.sqrt(numerator)/Math.sqrt(denominator)) <= stopping) {
+				iteration = 50;
+			}else {
+				for(int i = 0; i < numOfEquations; i++) {//resets for next iteration
+					initialValue[i] = newValue[i];
+				}
+			}
+			
+			iteration++;
+		}while(iteration < 50);
+		
+		for(int i = 0; i < numOfEquations; i++) {
+			results[i] = newValue[i];
+		}
 		return results;
 	}
 	
@@ -108,22 +192,37 @@ public class hw_2{
 		if(verify(equations, numOfEquations)) {
 			
 			
-			double[] stopping = new double[numOfEquations];
+			double stopping;
+			double[] initial = new double[numOfEquations];
 			double[] results = new double[numOfEquations];
-			System.out.println("Please input the stopping condition for your equations:");
+			System.out.println("Please input the stopping error for your equations:");
+			stopping = scan.nextDouble();
+			System.out.println("Please input the initial solution for the iteration");
 			for(int i = 0; i < numOfEquations; i++) {
-				stopping[i] = scan.nextDouble();
+				initial[i] = scan.nextDouble();
 			}
 			System.out.println("Please select a calculation method: \n(1)Jacobi\n(2)Gaussian");
 			method = scan.nextInt();
 			
 			if(method == 1) {
 				
-				results = jacobi(equations, stopping, numOfEquations);
+				results = jacobi(equations, stopping, initial,numOfEquations);
+				System.out.println("\nFinal Solution: ");
+				System.out.print("[ ");
+				for(int num = 0; num < numOfEquations; num++) {
+					System.out.print(Math.round(results[num] * 10000.0) / 10000.0 + " "); 
+				}
+				System.out.println("]");
 				
 			}else if(method == 2) {
 				
-				results = gaussian(equations, stopping, numOfEquations);
+				results = gaussian(equations, stopping, initial,numOfEquations);
+				System.out.println("\nFinal Solution: ");
+				System.out.print("[ ");
+				for(int num = 0; num < numOfEquations; num++) {
+					System.out.print(Math.round(results[num] * 10000.0) / 10000.0 + " "); 
+				}
+				System.out.println("]");
 				
 			}else {
 				System.out.println("Method Invalid.\nPlease retry program.");
